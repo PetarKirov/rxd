@@ -1,0 +1,4 @@
+name "rxd"
+description "A minimal D application."
+copyright "Copyright © 2016, zombinedev"
+authors "zombinedev"
