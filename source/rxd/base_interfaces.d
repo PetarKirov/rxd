@@ -1,15 +1,4 @@
-module rxd.interfaces;
-
-struct ScheduleToken(Scheduler)
-{
-    Scheduler.WeakRefOf scheduler;
-    size_t idx;
-
-    bool cancel()
-    {
-        return scheduler && scheduler.cancel();
-    }
-}
+module rxd.base_interfaces;
 
 ///
 interface IObserver(T)

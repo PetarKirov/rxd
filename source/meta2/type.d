@@ -21,6 +21,16 @@ auto aliasTuple(Types...)(Types)
     return AliasTuple!Types();
 }
 
+template TypeSeq(T...)
+{
+    import std.meta : AliasSeq;
+    static if (T.length == 0)
+        alias TypeSeq = AliasSeq!();
+
+    else
+        alias TypeSeq = AliasSeq!(Type!(T[0]), TypeSeq!(T[1 .. $]));
+}
+
 ///
 struct Type(T)
 {
