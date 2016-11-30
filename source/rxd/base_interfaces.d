@@ -99,7 +99,7 @@ unittest
 
         int opOpAssign(string op, T)(T other) if (is(T : int))
         {
-            this = this + other;
+            mixin ("this = this " ~ op ~ " other;");
             return this.number;
         }
 
@@ -122,25 +122,33 @@ unittest
         IDisposable subscribe(IObserver!int o)
         {
             observers ~= o;
+            o.onNext(this.number);
             return new Ticket(observers.length - 1);
         }
     }
 
     class NumberObserver : IObserver!int
     {
-        import std.stdio : writefln;
-        void onNext(int x) { writefln("New int: %s", x); }
+        int[] result;
+        void onNext(int x) { result ~= x; }
         void onError(Exception error) { assert (0); }
         void onCompleted() { assert (0); }
     }
 
-    auto num = new ObservableNumber;
+    auto observervable = new ObservableNumber;
+    auto observer = new NumberObserver;
 
-    auto ticket = num.subscribe(new NumberObserver);
+    auto ticket = observervable.subscribe(observer);
+    assert ((cast(ObservableNumber.Ticket)ticket).idx == 0);
+    assert (observervable.observers.length == 1);
+    assert (observer.result == [ 0 ]);
 
-    num++;
-    num += 3;
-    num *= 2;
+    observervable++;
+    observervable += 3;
+    observervable *= 2;
+
+    assert (observervable.number == 8);
+    assert (observer.result == [ 0, 1, 4, 8 ]);
 }
 
 ///

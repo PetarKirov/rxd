@@ -5,9 +5,7 @@ import rxd.meta2.traits;
 
 ///
 struct ScheduleToken(Scheduler)
-    if (isFuncLike!(
-            typeof(Scheduler.WeakRefOf.init.cancel),
-            Func!(bool, size_t)))
+    if (isFuncLike!(typeof(Scheduler.cancel), bool function(size_t)))
 {
     Scheduler.WeakRefOf scheduler;
     size_t idx;
