@@ -36,6 +36,9 @@ struct Type(T)
 {
     alias type = T;
 
+    bool opEquals(U)(Type!U other)
+    { return is(T == U); }
+
     auto opSlice()()
     { return Type!(T[]).init; }
 
@@ -57,6 +60,14 @@ struct Type(T)
     }
 }
 
+unittest
+{
+    Type!int t;
+
+    auto t2 = t.constOf;
+
+}
+
 ///
 struct AliasTuple(Types...)
 {
@@ -76,8 +87,8 @@ struct AliasTuple(Types...)
 
         auto front()() { return this; }
         auto back()() { return this; }
-        auto dropOne()() { return this; }
-        auto dropBackOne()() { return this; }
+        auto dropOne()() { static assert (0); }
+        auto dropBackOne()() { static assert (0); }
     }
     else
     {
