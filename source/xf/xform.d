@@ -47,7 +47,7 @@ unittest
 
     auto tuple = AliasTuple!(Type!int, Type!double, Type!char)();
 
-    auto large = filter!(t => t.type.sizeof >= 4);
+    auto large = filter!(t => t.typeOf.sizeof >= 4);
     auto result1 = transform(tuple, large);
     static assert (is(result1.typeSeq == AliasSeq!(int, double)));
 

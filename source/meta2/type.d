@@ -4,7 +4,7 @@ module rxd.meta2.type;
 import std.traits : isInstanceOf;
 
 ///
-enum isType(T) = isInstanceOf!(Type, T);
+enum isType(T...) = T.length == 1 && is(T[0] : Type!U, U);
 
 ///
 enum isAliasTuple(T) = isInstanceOf!(AliasTuple, T);
@@ -34,11 +34,16 @@ template TypeSeq(T...)
 ///
 struct Type(T)
 {
-    alias type = T;
+    ///
+    alias typeOf = T;
 
+    const pure nothrow @safe @nogc:
+
+    ///
     bool opEquals(U)(Type!U other)
     { return is(T == U); }
 
+    ///
     auto opSlice()()
     { return Type!(T[]).init; }
 
@@ -48,15 +53,17 @@ struct Type(T)
     auto constOf()()
     { return Type!(const(T)).init; }
 
+    ///
     auto immutableOf()()
     { return Type!(immutable(T)).init; }
 
+    ///
     auto sharedOf()()
     { return Type!(shared(T)).init; }
 
     string toString()
     {
-        return "Type!("~T.stringof~")";
+        return typeof(this).stringof;
     }
 }
 
@@ -112,7 +119,7 @@ template SeqFromTuple(Tuple : AliasTuple!TL, TL...)
         alias SeqFromTuple = AliasSeq!();
     else
         alias SeqFromTuple = AliasSeq!(
-                TL[0].type,
+                TL[0].typeOf,
                 SeqFromTuple!(Tuple.init.dropOne().typeOf)
         );
 

@@ -14,10 +14,10 @@ template allConvertible(From, To)
         enum allConvertible = is(From : To);
 
     else static if (isType!From)
-        enum allConvertible = allConvertible!(From.type, To);
+        enum allConvertible = allConvertible!(From.typeOf, To);
 
     else static if (isType!To)
-        enum allConvertible = allConvertible!(From, To.type);
+        enum allConvertible = allConvertible!(From, To.typeOf);
 
     else static if (isAliasTuple!From && isAliasTuple!To)
     {
@@ -29,10 +29,14 @@ template allConvertible(From, To)
 
         else
             enum allConvertible =
-                allConvertible!(From.init.front.type, To.init.front.type) &&
+                allConvertible!(
+                        From.init.front.typeOf,
+                        To.init.front.typeOf
+                ) &&
                 allConvertible!(
                         typeof(From.init.dropOne()),
-                        typeof(To.init.dropOne()));
+                        typeof(To.init.dropOne())
+                );
     }
 
     else
