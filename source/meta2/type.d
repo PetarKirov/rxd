@@ -4,13 +4,17 @@ module rxd.meta2.type;
 import std.traits : isInstanceOf;
 
 ///
+enum isRawType(T...) = T.length == 1 &&
+    is(T[0]) && !is(T[0] : Type!U, U);
+
+///
 enum isType(T...) = T.length == 1 && is(T[0] : Type!U, U);
 
 ///
 enum isAliasTuple(T) = isInstanceOf!(AliasTuple, T);
 
 ///
-auto aliasTuple(Types...)(Types)
+auto aliasTuple(Types...)()
 {
     return AliasTuple!Types();
 }
@@ -59,6 +63,15 @@ struct ValTuple(vals...)
 auto type(T)()
 {
     return Type!T.init;
+}
+
+/// ditto
+alias Type(T : Type!U, U) = T;
+
+///
+unittest
+{
+    static assert (is(Type!(Type!int) == Type!int));
 }
 
 /// ditto
@@ -151,7 +164,7 @@ struct Type(T)
     /// Convience function that forwards to std.traits.
     auto opDispatch(string traitName)()
     {
-        import std.meta : AliasSeq;
+        import std.meta : AliasSeq, allSatisfy;
         import std.traits;
 
         alias res = AliasSeq!(mixin(traitName ~ "!(this.typeOf)"));
@@ -163,6 +176,10 @@ struct Type(T)
         else static if (res.length == 1 && is(res[0]))
             // Wrap types in Type(T)
             return type!res;
+
+        else static if (allSatisfy!(isRawType, res))
+            // Return AliasTuple
+            return aliasTuple!(TypeSeq!res);
 
         else
             // Wrap value tuples in ValTuple
@@ -192,6 +209,25 @@ struct Type(T)
         static assert (t4.OriginalType == type!string);
         enum members = t4.EnumMembers;
         static assert ([t4.EnumMembers.expand] == [Names.n1, Names.n2]);
+
+        class C0 {}
+        class C1 : C0 {}
+        class C2 : C1 {}
+        class C3 : C2 {}
+
+        enum t5 = type!C3;
+        static assert (t5.BaseClassesTuple ==
+            aliasTuple!(Type!C2, Type!C1, Type!C0, Type!Object));
+
+        interface I0 { }
+        interface I1 { }
+        interface I2 { }
+        interface I12 : I0, I1, I2 { }
+        interface I12_12 : I1, I2, I12 {}
+
+        enum t6 = type!I12_12;
+        static assert (t6.InterfacesTuple ==
+            aliasTuple!(Type!I1, Type!I2, Type!I12, Type!I0));
     }
 
     ///
