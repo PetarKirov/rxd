@@ -1,12 +1,13 @@
-import std.stdio;
+///
+module rxd.example;
 
+import std.stdio;
 import std.traits : Parameters, ReturnType;
 
 enum isObserver(O, E) = is(typeof(useObserver!(O, E)()));
 
 enum isFunctionLike(F, This) =
     is(typeof(F(Parameters!This.init)) : ReturnType!This);
-
 
 void useObserver(O, E)()
 {
@@ -30,15 +31,14 @@ unittest
 
     struct ObserverStruct
     {
-        void onNex(double) const nothrow { }
+        void onNext(double) const nothrow { }
         void onComplete() @nogc pure { }
-        void onError(Exception) @safe immutable { }
+        void onError(Exception) @safe const { }
     }
 
     useObserver!(ObserverClass, int)();
     useObserver!(ObserverStruct, double)();
 }
-
 
 struct Result
 {
@@ -76,10 +76,4 @@ unittest
     myObservable.subscribe!(myOnNext)();
 
     // go on about my business
-}
-
-
-void main()
-{
-	writeln("Edit source/app.d to start your project.");
 }
