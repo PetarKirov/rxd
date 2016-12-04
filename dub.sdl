@@ -1,4 +1,8 @@
 name "rxd"
-description "A minimal D application."
-copyright "Copyright © 2016, zombinedev"
-authors "zombinedev"
+description "A library for functional and meta programming"
+
+copyright "Copyright © 2016, Petar Kirov"
+authors "Petar Kirov"
+license "BSL-1.0"
+
+targetType "library"
