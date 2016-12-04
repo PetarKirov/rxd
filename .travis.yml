@@ -1,0 +1,13 @@
+sudo: false
+os:
+ - linux
+ - osx
+language: d
+d:
+   - dmd
+   - dmd-beta
+   - dmd-nightly
+   - ldc-beta
+matrix:
+  allow_failures:
+   - d: ldc-beta
