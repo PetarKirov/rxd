@@ -1,5 +1,5 @@
 ///
-module rxd.scheduling_interfaces;
+module rxd.rx.scheduling_interfaces;
 
 import rxd.meta2.traits;
 

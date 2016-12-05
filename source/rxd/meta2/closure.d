@@ -1,5 +1,5 @@
 ///
-module rxd.closure;
+module rxd.meta2.closure;
 
 struct Closure(Args...)
 {

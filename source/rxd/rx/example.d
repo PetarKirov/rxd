@@ -1,5 +1,5 @@
 ///
-module rxd.example;
+module rxd.rx.example;
 
 import std.stdio;
 import std.traits : Parameters, ReturnType;

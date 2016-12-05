@@ -1,4 +1,4 @@
-module rxd.base_interfaces;
+module rxd.rx.base_interfaces;
 
 ///
 interface IDisposable
