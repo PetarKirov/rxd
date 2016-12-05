@@ -62,4 +62,16 @@ unittest
     assert (c == 33);
     assert (inner.c == 33);
     assert (outer.c == 33);
+
+    static void someFunc(C)(C closure)
+    {
+        assert (closure.a == 35);
+
+        //assert (a == 35); /* <- doesn't work */
+
+        with (closure)
+            assert (a == 35);
+    }
+
+    someFunc(outer);
 }
