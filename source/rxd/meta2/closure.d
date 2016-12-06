@@ -1,6 +1,8 @@
 ///
 module rxd.meta2.closure;
 
+import rxd.meta2.traits : isEnumValue;
+
 struct Closure(Args...)
 {
     pragma (msg, "In Closure template: ", Args.stringof);
@@ -13,39 +15,7 @@ struct Closure(Args...)
     private alias __my__args__ = Args;
 }
 
-private string genArgsAliases(Args...)(string _)
-{
-    enum string prefix = "Args";
-
-    import std.conv : to;
-    import std.format : format;
-    import std.typecons : staticIota;
-    string res;
-
-    pragma (msg, "In genArgsAliases -> ", Args.stringof);
-    pragma (msg, "In genArgsAliases -> ", is(typeof(Args[0])));
-
-    string genAliasFunc(string name, string start, size_t idx)()
-    {
-        pragma (msg, "In genAliasFunc -> name: ", name, " start: ", start,
-                " idx: ", idx);
-
-        return ("    auto ref __get__%1$s() { return %2$s[%3$s]; }\n" ~
-                "    alias %1$s = __get__%1$s;\n")
-            .format(name, start, idx);
-    }
-
-    foreach (idx; staticIota!(0, Args.length))
-        static if (is(typeof(Args[idx]) : Closure!U, U...))
-            foreach (idx2; staticIota!(0, Args[idx].__my__args__.length))
-                res ~= genAliasFunc!(Args[idx].__my__args__[idx2].stringof,
-                            "Args[" ~ idx.to!string ~"].__my__args__", idx2);
-        else
-            res ~= genAliasFunc!(Args[idx].stringof, prefix, idx);
-
-    return res;
-}
-
+///
 unittest
 {
     struct Point { float x, y; }
@@ -53,8 +23,9 @@ unittest
     int a = 34;
     Point b = { 3, 4 };
     int c = 32;
+    enum d = 42;
 
-    auto inner = Closure!(c)();
+    auto inner = Closure!(c, d)();
     auto outer = Closure!(inner, a, b)();
 
     static assert (inner.sizeof >= (void*).sizeof);
@@ -89,4 +60,40 @@ unittest
     }
 
     someFunc(outer);
+}
+
+private string genArgsAliases(Args...)(string prefix = "Args")
+{
+    //enum string prefix = "Args";
+
+    import std.conv : to;
+    import std.format : format;
+    import std.typecons : staticIota;
+    string res;
+
+    pragma (msg, "In genArgsAliases -> ", Args.stringof);
+
+    string genAliasFunc(string name, string start, size_t idx)
+    {
+        //pragma (msg, "In genAliasFunc -> name: ", name, " start: ", start,
+        //        " idx: ", idx);
+
+        return ("    auto ref __get__%1$s() { return %2$s[%3$s]; }\n" ~
+                "    alias %1$s = __get__%1$s;\n")
+            .format(name, start, idx);
+    }
+
+    foreach (idx; staticIota!(0, Args.length))
+        static if (isEnumValue!(Args[idx]))
+            res ~= "    enum %s = %s[%s];\n"
+                .format(__traits(identifier, Args[idx]), prefix, idx);
+
+        else static if (is(typeof(Args[idx]) : Closure!U, U...))
+            res ~= genArgsAliases!(Args[idx].__my__args__)(
+                "%s[%s].__my__args__".format(prefix, idx));
+
+        else
+            res ~= genAliasFunc(Args[idx].stringof, prefix, idx);
+
+    return res;
 }

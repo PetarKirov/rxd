@@ -1,6 +1,9 @@
 ///
 module rxd.meta2.traits;
 
+enum isEnumValue(T...) = T.length == 1 &&
+    __traits(compiles, { enum x = T[0]; });
+
 ///
 //enum allConvertible(alias from, alias to) =
 //    allConvertible!(typeof(from), typeof(to));
